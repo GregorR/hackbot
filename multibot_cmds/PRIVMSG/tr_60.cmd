@@ -50,7 +50,7 @@ runcmd() {
         ulimit -t 30
         ulimit -u 1024
     
-        echo "$CMD" | pola-nice bash 2>&1
+        echo "$CMD" | pola-nice bash
         echo ''
     ) | (
         if [ "$IRC_SOCK" != "" ]
