@@ -100,7 +100,7 @@ runcmd() {
     then
         (
             ulimit -f 10240
-            wget "$SARG" | maybe_dcc_chat "$IRC_NICK"
+            wget "$SARG" < /dev/null | maybe_dcc_chat "$IRC_NICK"
         )
     else
         runcmd
