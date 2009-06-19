@@ -22,6 +22,15 @@ undo() {
     export UNDO="$UNDO; $1"
 }
 
+maybe_dcc_chat() {
+    if [ "$IRC_SOCK" != "" ]
+    then
+        dcc_chat "$@"
+    else
+        cat
+    fi
+}
+
 if [ "$IRC_SOCK" != "" ]
 then
     CMD=`echo "$3" | sed 's/^.//'`
@@ -41,6 +50,10 @@ cd /tmp/hackenv.$$ || die "Failed to enter the environment!"
 
 # Add it to the PATH
 export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
+
+# Special commands
+SCMD=`echo "$CMD" | sed 's/^\([^ ]*\) .*$/\1/'`
+SARG=`echo "$CMD" | sed 's/^\([^ ]*\) *//'`
 
 # Now run the command
 runcmd() {
@@ -82,7 +95,16 @@ runcmd() {
 }
 
 (
-    runcmd
+    # Special commands
+    if [ "$SCMD" = "fetch" ]
+    then
+        (
+            ulimit -f 10240
+            wget "$SARG" | maybe_dcc_chat "$IRC_NICK"
+        )
+    else
+        runcmd
+    fi
 
     # Now commit the changes (make multiple attempts in case things fail)
     for (( i = 0; $i < 10; i++ ))
