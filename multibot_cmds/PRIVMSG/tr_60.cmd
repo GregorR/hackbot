@@ -45,7 +45,7 @@ export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
     ulimit -t 30
     ulimit -u 1024
 
-    echo "$CMD" | pola-nice bash
+    echo "$CMD" | pola-nice bash 2>&1
     echo ''
 ) | (
     if [ "$IRC_SOCK" != "" ]

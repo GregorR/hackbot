@@ -3,7 +3,17 @@
 ORIGDIR="$PWD"
 
 pola-nice() {
-    pola-run -B -f=/lib64 -f=/etc/alternatives -f=/proc -fw=. \
+    POLA_OPTS=""
+    if [ -e /lib64 ]
+    then
+        POLA_OPTS="$POLA_OPTS -f=/lib64"
+    fi
+    if [ -e /etc/alternatives ]
+    then
+        POLA_OPTS="$POLA_OPTS -f=/etc/alternatives"
+    fi
+
+    pola-run -B $POLA_OPTS -f=/proc -fw=. \
         --prog=nice -a=-n10 \
         -fa="$ORIGDIR"/slox/slox -a=25 \
         -e "$@"
