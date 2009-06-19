@@ -30,7 +30,7 @@ else
 fi
 
 # Now clone the environment
-hg clone env /tmp/hackenv.$$ >& /dev/null || die "Failed to clone the environment!"
+hg clone env /tmp/hackenv.$$ || die "Failed to clone the environment!"
 undo "cd; rm -rf /tmp/hackenv.$$"
 cd /tmp/hackenv.$$ || die "Failed to enter the environment!"
 
@@ -45,7 +45,7 @@ export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
     ulimit -t 30
     ulimit -u 1024
 
-    pola-nice $CMD
+    echo "$CMD" | pola-nice bash
     echo ''
 ) | (
     if [ "$IRC_SOCK" != "" ]
@@ -82,17 +82,17 @@ export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
 for (( i = 0; $i < 10; i++ ))
 do
     find . -name '*.orig' | xargs rm -f
-    hg addremove >& /dev/null || die "Failed to record changes."
-    hg commit -m "$CMD" >& /dev/null || die "Failed to record changes."
+    hg addremove || die "Failed to record changes."
+    hg commit -m "$CMD" || die "Failed to record changes."
 
-    hg push >& /dev/null && break || (
+    hg push && break || (
         # Failed to push, that means we need to pull and merge
         hg pull
         for h in `hg heads --template='{node} '`
         do
-            hg merge $h >& /dev/null
-            hg commit -m 'branch merge' >& /dev/null
-            hg revert --all >& /dev/null
+            hg merge $h
+            hg commit -m 'branch merge'
+            hg revert --all
             find . -name '*.orig' | xargs rm -f
         done
     )
