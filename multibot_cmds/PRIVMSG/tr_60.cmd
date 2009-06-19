@@ -1,5 +1,5 @@
 #!/bin/bash
-# 21 = !
+# 60 = `
 
 . lib/dcc
 . lib/interp
