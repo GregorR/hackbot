@@ -24,7 +24,12 @@ undo() {
 
 if [ "$IRC_SOCK" != "" ]
 then
-    CMD="$3"
+    CMD=`echo "$3" | sed 's/^.//'`
+    CHANNEL="$2"
+    if ! expr "$CHANNEL" : "#" > /dev/null
+    then
+        CHANNEL="$IRC_NICK"
+    fi
 else
     CMD="$1"
 fi
@@ -38,65 +43,70 @@ cd /tmp/hackenv.$$ || die "Failed to enter the environment!"
 export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
 
 # Now run the command
+runcmd() {
+    (
+        ulimit -f 10240
+        ulimit -v $(( 128 * 1024 ))
+        ulimit -t 30
+        ulimit -u 1024
+    
+        echo "$CMD" | pola-nice bash -x 2>&1
+        echo ''
+    ) | (
+        if [ "$IRC_SOCK" != "" ]
+        then
+            read -r LN
+            if [ "$LN" ]; then
+                echo 'PRIVMSG '$CHANNEL' :'"$LN" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+            fi
+        
+            LN=
+            while read -r LN
+            do
+                if [ "$LN" != "" ] ; then break ; fi
+            done
+        
+            if [ "$LN" != "" ]
+            then
+                # OK, send the rest over DCC
+                (
+                    echo "$LN"
+                    cat | head -c 16384
+                ) | dcc_chat "$IRC_NICK"
+            fi
+    
+        else
+            cat
+        fi
+    )
+}
 
 (
-    ulimit -f 10240
-    ulimit -v $(( 128 * 1024 ))
-    ulimit -t 30
-    ulimit -u 1024
+    runcmd
 
-    echo "$CMD" | pola-nice bash 2>&1
-    echo ''
-) | (
-    if [ "$IRC_SOCK" != "" ]
-    then
-        read -r LN
-        if [ "$LN" ]; then
-            echo 'PRIVMSG '$CHANNEL' :'"$LN" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
-        fi
+    # Now commit the changes (make multiple attempts in case things fail)
+    for (( i = 0; $i < 10; i++ ))
+    do
+        find . -name '*.orig' | xargs rm -f
+        hg addremove || die "Failed to record changes."
+        hg commit -m "$CMD" || die "Failed to record changes."
     
-        LN=
-        while read -r LN
-        do
-            if [ "$LN" != "" ] ; then break ; fi
-        done
-    
-        if [ "$LN" != "" ]
-        then
-            # OK, send the rest over DCC
-            (
-                echo "$LN"
-                cat | head -c 16384
-            ) | dcc_chat "$IRC_NICK"
-        fi
+        hg push && break || (
+            # Failed to push, that means we need to pull and merge
+            hg pull
+            for h in `hg heads --template='{node} '`
+            do
+                hg merge $h
+                hg commit -m 'branch merge'
+                hg revert --all
+                find . -name '*.orig' | xargs rm -f
+            done
+        )
+    done
+) &
 
-    else
-        cat
-    fi
-) #& FIXME
-
-#sleep 30 FIXME
-#kill -9 %1
-
-# Now commit the changes (make multiple attempts in case things fail)
-for (( i = 0; $i < 10; i++ ))
-do
-    find . -name '*.orig' | xargs rm -f
-    hg addremove || die "Failed to record changes."
-    hg commit -m "$CMD" || die "Failed to record changes."
-
-    hg push && break || (
-        # Failed to push, that means we need to pull and merge
-        hg pull
-        for h in `hg heads --template='{node} '`
-        do
-            hg merge $h
-            hg commit -m 'branch merge'
-            hg revert --all
-            find . -name '*.orig' | xargs rm -f
-        done
-    )
-done
+sleep 30
+kill -9 %1
 
 # And get rid of our tempdir
 bash -c "$UNDO"
