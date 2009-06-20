@@ -62,7 +62,7 @@ runcmd() {
         ulimit -t 30
         ulimit -u 1024
     
-        pola-nice "$@"
+        pola-nice "$@" | perl -pe 's/\n/ \\ /g' | fmt -w500 | sed 's/ \\$//'
         echo ''
     ) | (
         if [ "$IRC_SOCK" != "" ]
@@ -99,7 +99,7 @@ runcmd() {
     then
         (
             ulimit -f 10240
-            wget -nv "$ARG" < /dev/null 2>&1 | fmt -w500 |
+            wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " " |
                 sed 's/^/PRIVMSG '$CHANNEL' :/' |
                 socat STDIN UNIX-SENDTO:"$IRC_SOCK"
         )
