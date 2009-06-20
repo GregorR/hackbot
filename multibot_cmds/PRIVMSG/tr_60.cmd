@@ -42,6 +42,9 @@ then
 else
     CMD="$1"
 fi
+SCMD=`echo "$CMD" | sed 's/^\([^ ]*\) .*$/\1/'`
+ARG=`echo "$CMD" | sed 's/^\([^ ]*\) *//'`
+CMD="$SCMD"
 
 # Now clone the environment
 hg clone env /tmp/hackenv.$$ || die "Failed to clone the environment!"
@@ -51,10 +54,6 @@ cd /tmp/hackenv.$$ || die "Failed to enter the environment!"
 # Add it to the PATH
 export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
 
-# Special commands
-SCMD=`echo "$CMD" | sed 's/^\([^ ]*\) .*$/\1/'`
-SARG=`echo "$CMD" | sed 's/^\([^ ]*\) *//'`
-
 # Now run the command
 runcmd() {
     (
@@ -63,7 +62,7 @@ runcmd() {
         ulimit -t 30
         ulimit -u 1024
     
-        echo "$CMD" | pola-nice bash
+        pola-nice "$@"
         echo ''
     ) | (
         if [ "$IRC_SOCK" != "" ]
@@ -96,14 +95,24 @@ runcmd() {
 
 (
     # Special commands
-    if [ "$SCMD" = "fetch" ]
+    if [ "$CMD" = "fetch" ]
     then
         (
             ulimit -f 10240
-            wget "$SARG" < /dev/null | maybe_dcc_chat "$IRC_NICK"
+            wget -nv "$ARG" < /dev/null 2>&1 | fmt -w500 |
+                sed 's/^/PRIVMSG '$CHANNEL' :/' |
+                socat STDIN UNIX-SENDTO:"$IRC_SOCK"
         )
+    elif [ "$CMD" = "run" ]
+    then
+        echo "$ARG" | runcmd bash
     else
-        runcmd
+        if [ "$ARG" = "" ]
+        then
+            runcmd "$CMD"
+        else
+            runcmd "$CMD" "$ARG"
+        fi
     fi
 
     # Now commit the changes (make multiple attempts in case things fail)
