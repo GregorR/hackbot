@@ -58,9 +58,10 @@ export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
 runcmd() {
     (
         ulimit -f 10240
+        ulimit -l 0
         ulimit -v $(( 128 * 1024 ))
         ulimit -t 30
-        ulimit -u 1024
+        ulimit -u 128
     
         pola-nice "$@" | 
             head -c 16384 |
