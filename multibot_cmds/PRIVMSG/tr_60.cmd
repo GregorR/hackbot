@@ -62,7 +62,7 @@ runcmd() {
         ulimit -t 30
         ulimit -u 1024
     
-        pola-nice "$@" | perl -pe 's/\n/ \\ /g' | fmt -w500 | sed 's/ \\$//'
+        pola-nice "$@" | perl -pe 's/\n/ \\ /g' | fmt -w350 | sed 's/ \\$//'
         echo ''
     ) | (
         if [ "$IRC_SOCK" != "" ]
