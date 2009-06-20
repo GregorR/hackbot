@@ -62,6 +62,7 @@ runcmd() {
         ulimit -v $(( 128 * 1024 ))
         ulimit -t 30
         ulimit -u 128
+        export http_proxy='http://127.0.0.1:3128'
     
         pola-nice "$@" | 
             head -c 16384 |
