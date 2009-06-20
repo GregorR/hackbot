@@ -102,7 +102,7 @@ runcmd() {
     # Special commands
     if [ "$CMD" = "help" ]
     then
-        echo 'PRIVMSG '$CHANNEL' :This is HackBot, the extremely hackable bot. To run a command with one argument, type "`<command>", or "`run <command>" to run a shell command. "`fetch <URL>" downloads files, otherwise the network is inaccessible. Files saved to $PWD are persistent, and $PWD/bin is in $PATH.' |
+        echo 'PRIVMSG '$CHANNEL' :This is HackBot, the extremely hackable bot. To run a command with one argument, type "`<command>", or "`run <command>" to run a shell command. "`fetch <URL>" downloads files, otherwise the network is inaccessible. Files saved to $PWD are persistent, and $PWD/bin is in $PATH. $PWD is a mercurial repository; if you'\''re faimilar with mercurial, you can fix any problems caused by accidents or malice.' |
             socat STDIN UNIX-SENDTO:"$IRC_SOCK"
 
     elif [ "$CMD" = "fetch" ]
