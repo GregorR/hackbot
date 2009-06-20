@@ -100,14 +100,20 @@ runcmd() {
 
 (
     # Special commands
-    if [ "$CMD" = "fetch" ]
+    if [ "$CMD" = "help" ]
+    then
+        echo 'PRIVMSG '$CHANNEL' :This is HackBot, the extremely hackable bot. To run a command with one argument, type "`<command>", or "`run <command>" to run a shell command. "`fetch <URL>" downloads files, otherwise the network is inaccessible. Files saved to $PWD are persistent, and $PWD/bin is in $PATH.' |
+            socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+
+    elif [ "$CMD" = "fetch" ]
     then
         (
             ulimit -f 10240
-            wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " " |
+            (wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " "; echo) |
                 sed 's/^/PRIVMSG '$CHANNEL' :/' |
                 socat STDIN UNIX-SENDTO:"$IRC_SOCK"
         )
+
     elif [ "$CMD" = "run" ]
     then
         echo "$ARG" | runcmd bash
@@ -125,7 +131,7 @@ runcmd() {
     do
         find . -name '*.orig' | xargs rm -f
         hg addremove || die "Failed to record changes."
-        hg commit -m "$CMD" || die "Failed to record changes."
+        hg commit -m "$CMD $ARG" || die "Failed to record changes."
     
         hg push && break || (
             # Failed to push, that means we need to pull and merge
