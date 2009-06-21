@@ -53,7 +53,7 @@ undo "cd; rm -rf $HACKENV"
 cd "$HACKENV" || die "Failed to enter the environment!"
 
 # Add it to the PATH
-export PATH="$HACKENV/bin:/usr/bin:/bin"
+export POLA_PATH="$HACKENV/bin:/usr/bin:/bin"
 
 # Now run the command
 runcmd() {
