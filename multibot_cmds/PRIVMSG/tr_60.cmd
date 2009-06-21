@@ -133,7 +133,7 @@ runcmd() {
     do
         find . -name '*.orig' | xargs rm -f
         hg addremove >& /dev/null || die "Failed to record changes."
-        hg commit -m "$CMD $ARG" >& /dev/null || die "Failed to record changes."
+        hg commit -m "<$IRC_NICK> $CMD $ARG" >& /dev/null || die "Failed to record changes."
     
         hg push >& /dev/null && break || (
             # Failed to push, that means we need to pull and merge
