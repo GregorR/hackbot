@@ -76,21 +76,8 @@ runcmd() {
             read -r LN
             if [ "$LN" ]; then
                 echo 'PRIVMSG '$CHANNEL' :'"$LN" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
-            fi
-        
-            LN=
-            while read -r LN
-            do
-                if [ "$LN" != "" ] ; then break ; fi
-            done
-        
-            if [ "$LN" != "" ]
-            then
-                # OK, send the rest over DCC
-                (
-                    echo "$LN"
-                    cat | head -c 16384
-                ) | dcc_chat "$IRC_NICK"
+            else
+                echo 'PRIVMSG '$CHANNEL' :No output.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
             fi
     
         else
