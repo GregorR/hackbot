@@ -80,6 +80,9 @@ runcmd() {
             else
                 echo 'PRIVMSG '$CHANNEL' :No output.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
             fi
+
+            # Discard remaining output
+            cat > /dev/null
     
         else
             cat
