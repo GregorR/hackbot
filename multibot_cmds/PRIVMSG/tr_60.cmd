@@ -112,7 +112,11 @@ runcmd() {
 
     elif [ "$CMD" = "revert" ]
     then
-        hg revert --all -r $(( ARG + 0 )) >& /dev/null
+        ARG=$((ARG + 0))
+        if [ "$ARG" != "0" ]
+        then
+            hg revert --all -r $(( ARG + 0 )) >& /dev/null
+        fi
         echo 'PRIVMSG '$CHANNEL' :Done.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
 
     else
