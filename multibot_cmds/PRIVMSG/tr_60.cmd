@@ -47,12 +47,13 @@ ARG=`echo "$CMD" | sed 's/^\([^ ]*\) *//'`
 CMD="$SCMD"
 
 # Now clone the environment
-hg clone env /tmp/hackenv.$$ || die "Failed to clone the environment!"
-undo "cd; rm -rf /tmp/hackenv.$$"
-cd /tmp/hackenv.$$ || die "Failed to enter the environment!"
+export HACKENV="/tmp/hackenv.$$"
+hg clone env "$HACKENV" || die "Failed to clone the environment!"
+undo "cd; rm -rf $HACKENV"
+cd "$HACKENV" || die "Failed to enter the environment!"
 
 # Add it to the PATH
-export PATH="/tmp/hackenv.$$/bin:/usr/bin:/bin"
+export PATH="$HACKENV/bin:/usr/bin:/bin"
 
 # Now run the command
 runcmd() {
