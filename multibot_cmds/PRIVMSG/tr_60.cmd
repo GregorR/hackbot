@@ -48,7 +48,7 @@ CMD="$SCMD"
 
 # Now clone the environment
 export HACKENV="/tmp/hackenv.$$"
-hg clone env "$HACKENV" || die "Failed to clone the environment!"
+hg clone env "$HACKENV" >& /dev/null || die "Failed to clone the environment!"
 undo "cd; rm -rf $HACKENV"
 cd "$HACKENV" || die "Failed to enter the environment!"
 
@@ -112,7 +112,7 @@ runcmd() {
 
     elif [ "$CMD" = "revert" ]
     then
-        hg revert --all -r $(( ARG + 0 ))
+        hg revert --all -r $(( ARG + 0 )) >& /dev/null
         echo 'PRIVMSG '$CHANNEL' :Done.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
 
     else
@@ -128,18 +128,18 @@ runcmd() {
     for (( i = 0; $i < 10; i++ ))
     do
         find . -name '*.orig' | xargs rm -f
-        hg addremove || die "Failed to record changes."
-        hg commit -m "$CMD $ARG" || die "Failed to record changes."
+        hg addremove >& /dev/null || die "Failed to record changes."
+        hg commit -m "$CMD $ARG" >& /dev/null || die "Failed to record changes."
     
-        hg push && break || (
+        hg push >& /dev/null && break || (
             # Failed to push, that means we need to pull and merge
-            hg pull
-            for h in `hg heads --template='{node} '`
+            hg pull >& /dev/null
+            for h in `hg heads --template='{node} ' 2> /dev/null`
             do
-                hg merge $h
-                hg commit -m 'branch merge'
-                hg revert --all
-                find . -name '*.orig' | xargs rm -f
+                hg merge $h >& /dev/null
+                hg commit -m 'branch merge' >& /dev/null
+                hg revert --all >& /dev/null
+                find . -name '*.orig' 2> /dev/null | xargs rm -f >& /dev/null
             done
         )
     done

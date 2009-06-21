@@ -13,11 +13,15 @@ pola-nice() {
         POLA_OPTS="$POLA_OPTS -f=/etc/alternatives"
     fi
 
+    mkdir tmpdir.$$
+
     PATH="$POLA_PATH" \
-        /usr/bin/pola-run -B $POLA_OPTS -f=/proc -fw=. \
+        /usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp tmpdir.$$ -fw=. \
         --prog=/usr/bin/nice -a=-n10 \
         -fa="$ORIGDIR"/slox/slox -a=25 \
         -e "$@"
+
+    rm -rf tmpdir.$$
 }
 
 #pola-nice() {
