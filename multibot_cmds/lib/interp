@@ -16,7 +16,7 @@ pola-nice() {
     mkdir tmpdir.$$
 
     PATH="$POLA_PATH" \
-        /usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp tmpdir.$$ -fw=. -f=.hg \
+        /usr/bin/pola-run -B $POLA_OPTS -f=/proc -tw /tmp tmpdir.$$ -fw=$PWD \
         --prog=/usr/bin/nice -a=-n10 \
         -fa="$ORIGDIR"/slox/slox -a=25 \
         -e "$@"

@@ -48,9 +48,14 @@ CMD="$SCMD"
 
 # Now clone the environment
 export HACKENV="/tmp/hackenv.$$"
-hg clone env "$HACKENV" >& /dev/null || die "Failed to clone the environment!"
+hg clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
 undo "cd; rm -rf $HACKENV"
-cd "$HACKENV" || die "Failed to enter the environment!"
+cd "$HACKENV" || die 'Failed to enter the environment!'
+
+# And get .hg somewhere "safe"
+export HACKHG="/tmp/hackenv.hg.$$"
+mv .hg $HACKHG >& /dev/null || die 'Failed to clone the environment!'
+undo "rm -rf $HACKHG"
 
 # Add it to the PATH
 export POLA_PATH="$HACKENV/bin:/usr/bin:/bin"
@@ -64,7 +69,7 @@ runcmd() {
         ulimit -t 30
         ulimit -u 128
         export http_proxy='http://127.0.0.1:3128'
-    
+
         pola-nice "$@" | 
             head -c 16384 |
             perl -pe 's/\n/ \\ /g' |
@@ -115,7 +120,9 @@ runcmd() {
         ARG=$((ARG + 0))
         if [ "$ARG" != "0" ]
         then
+            mv $HACKHG .hg
             hg revert --all -r $(( ARG + 0 )) >& /dev/null
+            mv .hg $HACKHG
         fi
         echo 'PRIVMSG '$CHANNEL' :Done.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
 
@@ -129,6 +136,7 @@ runcmd() {
     fi
 
     # Now commit the changes (make multiple attempts in case things fail)
+    mv $HACKHG .hg 2>&1
     for (( i = 0; $i < 10; i++ ))
     do
         find . -name '*.orig' | xargs rm -f
