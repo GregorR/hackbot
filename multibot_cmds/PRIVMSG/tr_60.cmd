@@ -11,7 +11,7 @@ die() {
     bash -c "$UNDO"
     if [ "$IRC_SOCK" != "" ]
     then
-        echo "$1" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+        echo "PRIVMSG $CHANNEL :$1" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
     else
         echo "$1"
     fi
@@ -136,6 +136,7 @@ runcmd() {
     fi
 
     # Now commit the changes (make multiple attempts in case things fail)
+    if [ -e .hg ] ; then die "Invalid .hg directory found." ; fi
     mv $HACKHG .hg 2>&1
     for (( i = 0; $i < 10; i++ ))
     do
