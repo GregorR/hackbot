@@ -58,16 +58,11 @@ mv .hg $HACKHG >& /dev/null || die 'Failed to clone the environment!'
 undo "rm -rf $HACKHG"
 
 # Add it to the PATH
-export POLA_PATH="$HACKENV/bin:/usr/bin:/bin"
+export POLA_PATH="$HACKENV/bin:/opt/python27/bin:/usr/bin:/bin"
 
 # Now run the command
 runcmd() {
     (
-        ulimit -f 10240
-        ulimit -l 0
-        ulimit -v $(( 128 * 1024 ))
-        ulimit -t 30
-        ulimit -u 128
         export http_proxy='http://127.0.0.1:3128'
 
         pola-nice "$@" | 
@@ -142,7 +137,9 @@ runcmd() {
     do
         find . -name '*.orig' | xargs rm -f
         hg addremove >& /dev/null || die "Failed to record changes."
-        hg commit -m "<$IRC_NICK> $CMD $ARG" >& /dev/null || die "Failed to record changes."
+        hg commit -m "<$IRC_NICK> $CMD $ARG" >& /dev/null || 
+        hg commit -m "<$IRC_NICK> (unknown command)" >& /dev/null ||
+        hg commit -m "No message" || die "Failed to record changes."
     
         hg push >& /dev/null && break || (
             # Failed to push, that means we need to pull and merge
