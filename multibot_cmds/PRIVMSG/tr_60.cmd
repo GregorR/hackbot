@@ -76,7 +76,8 @@ runcmd() {
         then
             read -r LN
             if [ "$LN" ]; then
-                echo 'PRIVMSG '$CHANNEL' :'"$LN" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+                LN=`echo "$LN" | sed 's/[\x00-\x1F]/./g ; s/^\([^a-zA-Z0-9]\)/\xE2\x80\x8B\1/ ; s/\\\\/\\\\\\\\/g'`
+                echo -e 'PRIVMSG '$CHANNEL' :'"$LN" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
             else
                 echo 'PRIVMSG '$CHANNEL' :No output.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
             fi
