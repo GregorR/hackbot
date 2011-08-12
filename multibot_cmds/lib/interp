@@ -3,25 +3,28 @@
 ORIGDIR="$PWD"
 
 pola-nice() {
-    POLA_OPTS=""
-    if [ -e /lib64 ]
-    then
-        POLA_OPTS="$POLA_OPTS -f=/lib64"
-    fi
-    if [ -e /etc/alternatives ]
-    then
-        POLA_OPTS="$POLA_OPTS -f=/etc/alternatives"
-    fi
+#    POLA_OPTS=""
+#    if [ -e /lib64 ]
+#    then
+#        POLA_OPTS="$POLA_OPTS -f=/lib64"
+#    fi
+#    if [ -e /etc/alternatives ]
+#    then
+#        POLA_OPTS="$POLA_OPTS -f=/etc/alternatives"
+#    fi
+#
+#    mkdir tmpdir.$$
+#
+#    PATH="$POLA_PATH" \
+#        /usr/bin/pola-run -B $POLA_OPTS -f=/proc -f=/opt -tw /tmp tmpdir.$$ -fw=$PWD \
+#	-f="$ORIGDIR"/lib/limits --prog="$ORIGDIR"/lib/limits \
+#        -a=/usr/bin/nice -a=-n10 \
+#        -e "$@"
+#
+#    rm -rf tmpdir.$$
 
-    mkdir tmpdir.$$
-
-    PATH="$POLA_PATH" \
-        /usr/bin/pola-run -B $POLA_OPTS -f=/proc -f=/opt -tw /tmp tmpdir.$$ -fw=$PWD \
-	-f="$ORIGDIR"/lib/limits --prog="$ORIGDIR"/lib/limits \
-        -a=/usr/bin/nice -a=-n10 \
-        -e "$@"
-
-    rm -rf tmpdir.$$
+     nice -n10 /usr/bin/umlbox -n -B -f /opt -T 30 -tw /hackenv . --cwd /hackenv \
+         env PATH="$POLA_PATH" "$@"
 }
 
 #pola-nice() {

@@ -109,7 +109,7 @@ runcmd() {
 
     elif [ "$CMD" = "run" ]
     then
-        echo "$ARG" | runcmd bash
+        runcmd sh -c "$ARG"
 
     elif [ "$CMD" = "revert" ]
     then
@@ -133,6 +133,7 @@ runcmd() {
 
     # Now commit the changes (make multiple attempts in case things fail)
     if [ -e .hg ] ; then die "Invalid .hg directory found." ; fi
+    if [ ! -e canary ] ; then exit 1 ; fi
     mv $HACKHG .hg 2>&1
     for (( i = 0; $i < 10; i++ ))
     do
