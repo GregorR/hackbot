@@ -23,8 +23,8 @@ pola-nice() {
 #
 #    rm -rf tmpdir.$$
 
-     nice -n10 /usr/bin/umlbox -n -B -f /opt -T 30 -tw /hackenv . --cwd /hackenv \
-         env PATH="$POLA_PATH" "$@"
+     nice -n10 /usr/bin/umlbox -n -B -f /opt -T 30 -tw /hackenv . -f "$ORIGDIR/lib" --cwd /hackenv \
+         env PATH="$POLA_PATH" "$ORIGDIR/lib/limits" "$@"
 }
 
 #pola-nice() {

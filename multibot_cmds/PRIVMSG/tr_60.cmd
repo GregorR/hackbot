@@ -58,7 +58,7 @@ mv .hg $HACKHG >& /dev/null || die 'Failed to clone the environment!'
 undo "rm -rf $HACKHG"
 
 # Add it to the PATH
-export POLA_PATH="$HACKENV/bin:/opt/python27/bin:/usr/bin:/bin"
+export POLA_PATH="/hackenv/bin:/opt/python27/bin:/usr/bin:/bin"
 
 # Now run the command
 runcmd() {
