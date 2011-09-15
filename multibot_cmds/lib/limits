@@ -2,4 +2,4 @@
 ulimit -f 10240
 ulimit -l 0
 ulimit -u 128
-exec "$@"
+exec -- "$@"

@@ -23,8 +23,9 @@ pola-nice() {
 #
 #    rm -rf tmpdir.$$
 
-     nice -n10 /usr/bin/umlbox -n -B -f /opt -T 30 -tw /hackenv . -f "$ORIGDIR/lib" --cwd /hackenv \
-         env PATH="$POLA_PATH" "$ORIGDIR/lib/limits" "$@"
+     nice -n10 /usr/bin/umlbox -n -B -f /opt -f /var/irclogs -R3128:127.0.0.1:3128 -T 30 -tw \
+	 /hackenv . -f "$ORIGDIR/lib" --cwd /hackenv env PATH="$POLA_PATH" \
+	 HACKENV=/hackenv http_proxy="$http_proxy" "$ORIGDIR/lib/limits" "$@"
 }
 
 #pola-nice() {
