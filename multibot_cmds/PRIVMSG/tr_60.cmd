@@ -46,6 +46,9 @@ SCMD=`echo "$CMD" | sed 's/^\([^ ]*\) .*$/\1/'`
 ARG=`echo "$CMD" | sed 's/^\([^ ]*\) *//'`
 CMD="$SCMD"
 
+# Ignore Lymee
+test "$IRC_NICK" = "Lymee" && die 'Mmmmm ... no.'
+
 # Now clone the environment
 export HACKENV="/tmp/hackenv.$$"
 hg clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
@@ -141,7 +144,7 @@ runcmd() {
         hg addremove >& /dev/null || die "Failed to record changes."
         hg commit -m "<$IRC_NICK> $CMD $ARG" >& /dev/null || 
         hg commit -m "<$IRC_NICK> (unknown command)" >& /dev/null ||
-        hg commit -m "No message" || die "Failed to record changes."
+        hg commit -m "No message" #|| die "Failed to record changes."
     
         hg push >& /dev/null && break || (
             # Failed to push, that means we need to pull and merge
