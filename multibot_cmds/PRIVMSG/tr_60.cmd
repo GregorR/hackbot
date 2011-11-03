@@ -122,7 +122,8 @@ runcmd() {
         else
             REV=$ARG
         fi
-        OUTPUT=$(hg -R $HACKHG revert --all -r "$REV")
+        mv $HACKHG .hg 2>&1
+        OUTPUT=$(hg revert --all -r "$REV" 2>&1)
         if [ $? -eq 0 ]
         then
             MSG="Done."
@@ -130,6 +131,7 @@ runcmd() {
             MSG=$OUTPUT
         fi
         echo 'PRIVMSG '$CHANNEL' :'$MSG | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+        mv .hg $HACKHG
 
     else
         if [ "$ARG" = "" ]
