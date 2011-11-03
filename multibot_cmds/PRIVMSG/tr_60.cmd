@@ -116,14 +116,20 @@ runcmd() {
 
     elif [ "$CMD" = "revert" ]
     then
-        ARG=$((ARG + 0))
-        if [ "$ARG" != "0" ]
+        if [ "$ARG" = "" ]
         then
-            mv $HACKHG .hg
-            hg revert --all -r $(( ARG + 0 )) >& /dev/null
-            mv .hg $HACKHG
+            REV=-2
+        else
+            REV=$ARG
         fi
-        echo 'PRIVMSG '$CHANNEL' :Done.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+        OUTPUT=$(hg -R $HACKHG revert --all -r "$REV")
+        if [ $? -eq 0 ]
+        then
+            MSG="Done."
+        else
+            MSG=$OUTPUT
+        fi
+        echo 'PRIVMSG '$CHANNEL' :'$MSG | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
 
     else
         if [ "$ARG" = "" ]
