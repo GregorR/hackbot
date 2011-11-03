@@ -130,7 +130,7 @@ runcmd() {
         else
             MSG=$OUTPUT
         fi
-        echo 'PRIVMSG '$CHANNEL' :'$MSG | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+        echo "PRIVMSG $CHANNEL :$MSG" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
         mv .hg $HACKHG
 
     else
