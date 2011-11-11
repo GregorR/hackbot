@@ -46,8 +46,9 @@ SCMD=`echo "$CMD" | sed 's/^\([^ ]*\) .*$/\1/'`
 ARG=`echo "$CMD" | sed 's/^\([^ ]*\) *//'`
 CMD="$SCMD"
 
-# Ignore Lymee
-test "$IRC_NICK" = "Lymee" && die 'Mmmmm ... no.'
+# Ignore Lymia
+echo -n "$IRC_NICK" | grep -c '^Lymia\|^Lymee\|^Madoka-Kaname' >/dev/null &&
+    die 'Mmmmm ... no.'
 
 # Now clone the environment
 export HACKENV="/tmp/hackenv.$$"
