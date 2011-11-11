@@ -4,7 +4,7 @@ ORIGDIR="$PWD"
 
 pola-nice() {
      nice -n10 /usr/bin/umlbox -n -B -f /opt -f /var/irclogs -f /etc/java-6-openjdk -R3128:127.0.0.1:3128 -T 30 -tw \
-	 /hackenv . -f "$ORIGDIR/lib" --cwd /hackenv env PATH="$POLA_PATH" \
+	 /hackenv . -t /hackenv/.hg .hg -f "$ORIGDIR/lib" --cwd /hackenv env PATH="$POLA_PATH" \
 	 HACKENV=/hackenv http_proxy="$http_proxy" "$ORIGDIR/lib/limits" "$@"
 }
 

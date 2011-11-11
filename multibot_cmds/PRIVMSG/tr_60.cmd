@@ -55,11 +55,6 @@ hg clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
 undo "cd; rm -rf $HACKENV"
 cd "$HACKENV" || die 'Failed to enter the environment!'
 
-# And get .hg somewhere "safe"
-export HACKHG="/tmp/hackenv.hg.$$"
-mv .hg $HACKHG >& /dev/null || die 'Failed to clone the environment!'
-undo "rm -rf $HACKHG"
-
 # Add it to the PATH
 export POLA_PATH="/hackenv/bin:/opt/python27/bin:/opt/ghc/bin:/usr/bin:/bin"
 
@@ -122,7 +117,6 @@ runcmd() {
         else
             REV=$ARG
         fi
-        mv $HACKHG .hg 2>&1
         OUTPUT=$(hg revert --all -r "$REV" 2>&1)
         if [ $? -eq 0 ]
         then
@@ -131,7 +125,6 @@ runcmd() {
             MSG=$OUTPUT
         fi
         echo "PRIVMSG $CHANNEL :$MSG" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
-        mv .hg $HACKHG
 
     else
         if [ "$ARG" = "" ]
@@ -143,9 +136,7 @@ runcmd() {
     fi
 
     # Now commit the changes (make multiple attempts in case things fail)
-    if [ -e .hg ] ; then die "Invalid .hg directory found." ; fi
     if [ ! -e canary ] ; then exit 1 ; fi
-    mv $HACKHG .hg 2>&1
     for (( i = 0; $i < 10; i++ ))
     do
         find . -name '*.orig' | xargs rm -f
