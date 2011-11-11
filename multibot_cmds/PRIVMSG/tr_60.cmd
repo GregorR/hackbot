@@ -1,7 +1,6 @@
 #!/bin/bash
 # 60 = `
 
-. lib/dcc
 . lib/interp
 
 # Undo commands stored here
@@ -20,15 +19,6 @@ die() {
 
 undo() {
     export UNDO="$UNDO; $1"
-}
-
-maybe_dcc_chat() {
-    if [ "$IRC_SOCK" != "" ]
-    then
-        dcc_chat "$@"
-    else
-        cat
-    fi
 }
 
 if [ "$IRC_SOCK" != "" ]
