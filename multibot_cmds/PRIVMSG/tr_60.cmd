@@ -112,7 +112,7 @@ runcmd() {
 
     elif [ "$CMD" = "run" ]
     then
-        runcmd sh -c "$ARG"
+        runcmd bash -c "$ARG"
 
     elif [ "$CMD" = "revert" ]
     then
