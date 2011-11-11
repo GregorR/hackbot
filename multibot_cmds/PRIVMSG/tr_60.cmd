@@ -57,14 +57,14 @@ undo "cd; rm -rf $HACKENV"
 cd "$HACKENV" || die 'Failed to enter the environment!'
 
 # Add it to the PATH
-export POLA_PATH="/hackenv/bin:/opt/python27/bin:/opt/ghc/bin:/usr/bin:/bin"
+export UMLBOX_PATH="/hackenv/bin:/opt/python27/bin:/opt/ghc/bin:/usr/bin:/bin"
 
 # Now run the command
 runcmd() {
     (
         export http_proxy='http://127.0.0.1:3128'
 
-        pola-nice "$@" | 
+        umlbox-nice "$@" | 
             head -c 16384 |
             perl -pe 's/\n/ \\ /g' |
             fmt -w350 |
