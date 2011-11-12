@@ -40,6 +40,7 @@ def commit_thread():
     while True:
         commit_queue.get()
         killing = False
+        committing = True
         new_transactions = []
         to_start = []
         outputs = []
@@ -55,7 +56,8 @@ def commit_thread():
                 new_transactions.append(new_transaction)
                 continue
 
-            if not transaction.done:
+            if committing or not transaction.done:
+                committing = False
                 new_transactions.append(transaction)
                 continue
 
@@ -70,6 +72,8 @@ def commit_thread():
                 except HgFailed, e:
                     # Just pretend it worked...
                     outputs.append((transaction.channel, e.message))
+
+            outputs.append((transaction.channel, transaction.output))
 
         for channel, output in outputs:
             irc.send('PRIVMSG %s :%s\r\n' % (channel, sanitize(output)))
