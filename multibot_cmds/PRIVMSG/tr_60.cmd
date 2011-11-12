@@ -57,7 +57,7 @@ runcmd() {
         export http_proxy='http://127.0.0.1:3128'
 
         umlbox-nice "$@" | 
-            head -c 16384 |
+            head -c 512 |
             perl -pe 's/\n/ \\ /g' |
             fmt -w450 |
             sed 's/ \\$//'
