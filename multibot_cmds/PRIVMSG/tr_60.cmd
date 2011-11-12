@@ -86,7 +86,7 @@ runcmd() {
     then
         (
             ulimit -f 10240
-            { wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " "; echo; } | say
+            wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " " | say
         )
 
     elif [ "$CMD" = "run" ]
