@@ -59,7 +59,7 @@ runcmd() {
         umlbox-nice "$@" | 
             head -c 16384 |
             perl -pe 's/\n/ \\ /g' |
-            fmt -w350 |
+            fmt -w450 |
             sed 's/ \\$//'
         echo ''
     ) | (
@@ -130,7 +130,7 @@ runcmd() {
         hg commit -m "<$IRC_NICK> (unknown command)" >& /dev/null ||
         hg commit -m "No message" #|| die "Failed to record changes."
     
-        hg push >& /dev/null && break || (
+        hg push >& /dev/null && break || {
             # Failed to push, that means we need to pull and merge
             hg pull >& /dev/null
             for h in `hg heads --template='{node} ' 2> /dev/null`
@@ -140,7 +140,7 @@ runcmd() {
                 hg revert --all >& /dev/null
                 find . -name '*.orig' 2> /dev/null | xargs rm -f >& /dev/null
             done
-        )
+        }
     done
 ) &
 
