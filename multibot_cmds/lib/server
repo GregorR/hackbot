@@ -49,14 +49,14 @@ def commit_thread():
                 if not transaction.done:
                     transaction.done = True
                     transaction.process.kill()
-            if transaction.done:
-                if transaction.aborted:
-                    transaction.clean_up()
-                    new_transaction = Transaction(queue, transaction.args)
-                    to_start.append(new_transaction)
-                    new_transactions.append(new_transaction)
-                    continue
 
+            if transaction.done and transaction.aborted:
+                transaction.clean_up()
+                new_transaction = Transaction(queue, transaction.args)
+                to_start.append(new_transaction)
+                new_transactions.append(new_transaction)
+                continue
+            elif transaction.done:
                 if transaction.changed:
                     killing = True
                     # Commit the transaction
