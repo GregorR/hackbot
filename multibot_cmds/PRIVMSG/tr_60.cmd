@@ -86,9 +86,7 @@ runcmd() {
     then
         (
             ulimit -f 10240
-            (wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " "; echo) |
-                sed 's/^/PRIVMSG '$CHANNEL' :/' |
-                say
+            { wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " "; echo; } | say
         )
 
     elif [ "$CMD" = "run" ]
