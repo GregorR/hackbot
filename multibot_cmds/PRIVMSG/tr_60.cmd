@@ -29,12 +29,12 @@ def transact(*args):
     server.send(struct.pack('!p', '\0'.join(data)))
 
 if irc:
-    message = sys.argv[2][1:]
-    channel = sys.argv[1]
+    message = sys.argv[3][1:]
+    channel = sys.argv[2]
     if not channel.startswith('#'):
         channel = os.environ['IRC_NICK']
 else:
-    message = sys.argv[0]
+    message = sys.argv[1]
 
 command, arg = message.split(' ', 1)
 

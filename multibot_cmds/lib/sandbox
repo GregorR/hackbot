@@ -22,4 +22,4 @@ subprocess.call(
      '--timeout', '30',
      '-R3128:127.0.0.1a:3128',
      'env', 'PATH=' + path, 'HACKENV=/hackenv', 'http_proxy=' + http_proxy,
-     os.path.join(lib, 'limits')] + sys.argv)
+     os.path.join(lib, 'limits')] + sys.argv[1:])
