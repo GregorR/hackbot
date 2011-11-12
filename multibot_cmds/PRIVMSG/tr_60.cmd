@@ -3,11 +3,7 @@
 
 . lib/interp
 
-# Undo commands stored here
-export UNDO="true"
-
 die() {
-    bash -c "$UNDO"
     if [ "$IRC_SOCK" != "" ]
     then
         echo "PRIVMSG $CHANNEL :$1" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
@@ -15,10 +11,6 @@ die() {
         echo "$1"
     fi
     exit 1
-}
-
-undo() {
-    export UNDO="$UNDO; $1"
 }
 
 if [ "$IRC_SOCK" != "" ]
@@ -43,7 +35,7 @@ echo -n "$IRC_NICK" | grep -c '^Lymia\|^Lymee\|^Madoka-Kaname' >/dev/null &&
 # Now clone the environment
 export HACKENV="/tmp/hackenv.$$"
 hg clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
-undo "cd; rm -rf $HACKENV"
+trap "cd; rm -rf $HACKENV" 0
 cd "$HACKENV" || die 'Failed to enter the environment!'
 
 # Add it to the PATH
@@ -152,6 +144,3 @@ runcmd() {
 
 sleep 30
 kill -9 %1
-
-# And get rid of our tempdir
-bash -c "$UNDO"
