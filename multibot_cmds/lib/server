@@ -16,9 +16,8 @@ def sanitize(output):
     output = re.subn(r'\r?\n', ' \\ ')
     output = re.subn(r'[\x00-\x1F]', '.', output)
     output = re.subn(r'^[^a-zA-Z0-9]', '\xE2\x80\x8B\\1', output)
-    if len(output) > 447: # 450 - '...'
+    if len(output) > 450:
         output = output[:447] + '...'
-    output = output.translate(string.maketrans('\x01', '\x1f'))
     return output
 
 class HgFailed(Exception):
