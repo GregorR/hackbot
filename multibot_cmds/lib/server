@@ -5,6 +5,7 @@ import socket
 import threading
 import subprocess
 import Queue
+import tempfile
 import shutil
 
 irc = None
