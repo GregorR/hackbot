@@ -76,7 +76,10 @@ def commit_thread():
             outputs.append((transaction.channel, transaction.output))
 
         for channel, output in outputs:
-            irc.send('PRIVMSG %s :%s\r\n' % (channel, sanitize(output)))
+            if output:
+                irc.send('PRIVMSG %s :%s\r\n' % (channel, sanitize(output)))
+            else:
+                irc.send('PRIVMSG %s :No output.\r\n' % (channel,)) 
 
         transactions = new_transactions
         for transaction in to_start:
