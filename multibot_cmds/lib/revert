@@ -1,0 +1,12 @@
+#!/bin/sh
+if [ "$1" = "" ]; then
+    rev=-2
+else
+    rev=$1
+fi
+output=$(hg revert -R "$HACKENV" --all -r "$rev" 2>&1)
+if [ $? -eq 0 ]; then
+    echo 'Done.'
+else
+    echo "$output"
+fi

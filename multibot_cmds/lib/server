@@ -1,0 +1,150 @@
+#!/usr/bin/env python
+
+import os
+import socket
+import threading
+import subprocess
+import Queue
+import shutil
+
+irc = None
+transactions = []
+commit_queue = Queue.Queue()
+
+def sanitize(output):
+    output = re.subn(r'[\x01-\x1F]', '.', output)
+    output = re.subn(r'^[^a-zA-Z0-9]', '\xE2\x80\x8B\\1', output)
+    output = output.replace('\n', ' \\ ')
+    if len(output) > 447: # 450 - '...'
+        output = output[:447] + '...'
+    output = output.translate(string.maketrans('\x01', '\x1f'))
+    return output
+
+class HgFailed(Exception):
+    pass
+
+def hg(*args):
+    proc = subprocess.Popen(
+        ['hg', '--encodingmode', 'replace'] + args,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT)
+    proc.stdin.close()
+    output, _ = proc.communicate()
+    if proc.returncode != 0:
+        raise HgFailed(output)
+
+def commit_thread():
+    while True:
+        commit_queue.get()
+        killing = False
+        new_transactions = []
+        to_start = []
+        outputs = []
+        for transaction in transactions:
+            if killing:
+                transaction.aborted = True
+                if not transaction.done:
+                    transaction.done = True
+                    transaction.process.kill()
+            if transaction.done:
+                if transaction.aborted:
+                    transaction.clean_up()
+                    new_transaction = Transaction(queue, transaction.args)
+                    to_start.append(new_transaction)
+                    new_transactions.append(new_transaction)
+                    continue
+
+                if transaction.changed:
+                    killing = True
+                    # Commit the transaction
+                    try:
+                        hg('addremove')
+                        hg('commit', '<%s> %s' %
+                           (transaction.nick, ' '.join(transaction.args)))
+                        hg('push')
+                    except HgFailed, e:
+                        # Just pretend it worked...
+                        outputs.append((transaction.channel, e.message))
+                        continue
+
+                outputs.append((transaction.channel, transaction.output))
+            else:
+                new_transactions.append(transaction)
+        for channel, output in outputs:
+            irc.send('PRIVMSG %s :%s\r\n' % (channel, sanitize(output)))
+        transactions = new_transactions
+        for transaction in to_start:
+            transaction.start()
+
+class Transaction(object):
+    def __init__(self, nick, channel, *args):
+        self.nick = nick
+        self.channel = channel
+        self.args = args
+        self.hackenv = None
+        self.done = False
+        self.changed = False
+        self.aborted = False
+        self.process = None
+        self.output = None
+
+    def start(self):
+        threading.Thread(target=self.run).start()
+
+    def run(self):
+        if not self.clone_env():
+            self.done = True
+            self.aborted = True
+            commit_queue.put(None)
+            return
+        self.process = subprocess.Popen(
+            self.args,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env={'HACKENV': self.hackenv})
+        self.process.stdin.close()
+        self.output = self.process.stdout.read(512)
+        self.process.stdout.close()
+        self.process.wait()
+        self.commit()
+
+    def clone_env(self):
+        self.hackenv = tempfile.mkdtemp(prefix='hackenv')
+        proc = subprocess.Popen(
+            ['hg', 'clone', 'env', self.hackenv],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT)
+        output, _ = proc.communicate()
+        if proc.returncode != 0:
+            self.output = 'Failed to clone the environment! ' + output
+            self.done = True
+            return False
+        self.hackenv = hackenv
+        return True
+
+    def commit(self):
+        self.changed = bool(subprocess.Popen(
+            ['hg', '-R', self.hackenv, 'status', '-umad'],
+            stdout=subprocess.PIPE).communicate())
+        self.done = True
+        commit_queue.put(None)
+
+    def clean_up(self):
+        shutil.rmtree(self.hackenv, ignore_errors=True)
+
+if __name__ == '__main__':
+    irc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    irc.connect(os.environ['IRC_SOCK'])
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(os.environ['SERVER_SOCK'])
+    server.listen(1)
+    sock, _ = sock.accept()
+    threading.Thread(target=commit_queue).start()
+    while True:
+        nbytes = ord(sock.read(1))
+        data = sock.read(nbytes).split('\0')
+        transaction = Transaction(*data)
+        transactions.append(transaction)
+        transaction.start()

@@ -1,0 +1,5 @@
+#!/bin/sh
+ulimit -f 10240
+wget -nv "$1" </dev/null 2>&1 &
+sleep 30
+kill -9 %1
