@@ -23,9 +23,9 @@ def sanitize(output):
 class HgFailed(Exception):
     pass
 
-def hg(*args):
+def hg(hackenv, *args):
     proc = subprocess.Popen(
-        ['hg', '--encodingmode', 'replace'] + args,
+        ['hg', '--encodingmode', 'replace', '-R', hackenv] + args,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT)
@@ -59,10 +59,10 @@ def commit_thread():
                     killing = True
                     # Commit the transaction
                     try:
-                        hg('addremove')
-                        hg('commit', '<%s> %s' %
+                        hg(transaction.hackenv, 'addremove')
+                        hg(transaction.hackenv, 'commit', '<%s> %s' %
                            (transaction.nick, ' '.join(transaction.args)))
-                        hg('push')
+                        hg(transaction.hackenv, 'push')
                     except HgFailed, e:
                         # Just pretend it worked...
                         outputs.append((transaction.channel, e.message))
