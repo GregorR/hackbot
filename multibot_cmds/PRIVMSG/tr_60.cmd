@@ -33,9 +33,9 @@ echo -n "$IRC_NICK" | grep -c '^Lymia\|^Lymee\|^Madoka-Kaname' >/dev/null &&
     die 'Mmmmm ... no.'
 
 # Now clone the environment
-export HACKENV="/tmp/hackenv.$$"
-hg clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
+export HACKENV=$(mktemp --directory --tmpdir=$HACKTMP hackenv.XXXXXXXXXX)
 trap "cd; rm -rf $HACKENV" 0
+g clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
 cd "$HACKENV" || die 'Failed to enter the environment!'
 
 # Add it to the PATH
