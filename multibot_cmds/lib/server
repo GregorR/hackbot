@@ -43,38 +43,37 @@ def commit_thread():
         new_transactions = []
         to_start = []
         outputs = []
+
         for transaction in transactions:
             if killing:
-                transaction.aborted = True
                 if not transaction.done:
                     transaction.done = True
                     transaction.process.kill()
-
-            if transaction.done and transaction.aborted:
                 transaction.clean_up()
                 new_transaction = Transaction(queue, transaction.args)
                 to_start.append(new_transaction)
                 new_transactions.append(new_transaction)
                 continue
-            elif transaction.done:
-                if transaction.changed:
-                    killing = True
-                    # Commit the transaction
-                    try:
-                        hg(transaction.hackenv, 'addremove')
-                        hg(transaction.hackenv, 'commit', '<%s> %s' %
-                           (transaction.nick, ' '.join(transaction.args)))
-                        hg(transaction.hackenv, 'push')
-                    except HgFailed, e:
-                        # Just pretend it worked...
-                        outputs.append((transaction.channel, e.message))
-                        continue
 
-                outputs.append((transaction.channel, transaction.output))
-            else:
+            if not transaction.done:
                 new_transactions.append(transaction)
+                continue
+
+            if transaction.changed:
+                killing = True
+                # Commit the transaction
+                try:
+                    hg(transaction.hackenv, 'addremove')
+                    hg(transaction.hackenv, 'commit', '<%s> %s' %
+                       (transaction.nick, ' '.join(transaction.args)))
+                    hg(transaction.hackenv, 'push')
+                except HgFailed, e:
+                    # Just pretend it worked...
+                    outputs.append((transaction.channel, e.message))
+
         for channel, output in outputs:
             irc.send('PRIVMSG %s :%s\r\n' % (channel, sanitize(output)))
+
         transactions = new_transactions
         for transaction in to_start:
             transaction.start()
@@ -87,7 +86,6 @@ class Transaction(object):
         self.hackenv = None
         self.done = False
         self.changed = False
-        self.aborted = False
         self.process = None
         self.output = None
 
@@ -96,8 +94,8 @@ class Transaction(object):
 
     def run(self):
         if not self.clone_env():
+            self.clean_up()
             self.done = True
-            self.aborted = True
             commit_queue.put(None)
             return
         self.process = subprocess.Popen(
