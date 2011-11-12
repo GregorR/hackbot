@@ -3,13 +3,23 @@
 
 . lib/interp
 
-die() {
+say() {
+    if [ $# -lt 1 ]
+    then
+        TEXT=$(cat)
+    else
+        TEXT=$1
+    fi
     if [ "$IRC_SOCK" != "" ]
     then
-        echo "PRIVMSG $CHANNEL :$1" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+        echo "PRIVMSG $CHANNEL :$TEXT" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
     else
-        echo "$1"
+        echo "$TEXT"
     fi
+}
+
+die() {
+    say "$1"
     exit 1
 }
 
@@ -35,7 +45,7 @@ echo -n "$IRC_NICK" | grep -c '^Lymia\|^Lymee\|^Madoka-Kaname' >/dev/null &&
 # Now clone the environment
 export HACKENV=$(mktemp --directory --tmpdir=$HACKTMP hackenv.XXXXXXXXXX)
 trap "cd; rm -rf $HACKENV" 0
-g clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
+hg clone env "$HACKENV" >& /dev/null || die 'Failed to clone the environment!'
 cd "$HACKENV" || die 'Failed to enter the environment!'
 
 # Add it to the PATH
@@ -53,22 +63,16 @@ runcmd() {
             sed 's/ \\$//'
         echo ''
     ) | (
-        if [ "$IRC_SOCK" != "" ]
-        then
-            read -r LN
-            if [ "$LN" ]; then
-                LN=`echo "$LN" | sed 's/[\x01-\x1F]/./g ; s/^\([^a-zA-Z0-9]\)/\xE2\x80\x8B\1/ ; s/\\\\/\\\\\\\\/g'`
-                echo -e 'PRIVMSG '$CHANNEL' :'"$LN" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
-            else
-                echo 'PRIVMSG '$CHANNEL' :No output.' | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
-            fi
-
-            # Discard remaining output
-            cat > /dev/null
-    
+        read -r LN
+        if [ "$LN" ]; then
+            LN=`echo "$LN" | sed 's/[\x01-\x1F]/./g ; s/^\([^a-zA-Z0-9]\)/\xE2\x80\x8B\1/ ; s/\\\\/\\\\\\\\/g'`
+            echo -e "$LN" | say
         else
-            cat
+            say 'No output.'
         fi
+
+        # Discard remaining output
+        cat > /dev/null
     )
 }
 
@@ -76,8 +80,7 @@ runcmd() {
     # Special commands
     if [ "$CMD" = "help" ]
     then
-        echo 'PRIVMSG '$CHANNEL' :Runs arbitrary code in GNU/Linux. Type "`<command>", or "`run <command>" for full shell commands. "`fetch <URL>" downloads files. Files saved to $PWD are persistent, and $PWD/bin is in $PATH. $PWD is a mercurial repository, "`revert <rev>" can be used to revert to a revision. See http://codu.org/projects/hackbot/fshg/' |
-            socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+        say 'Runs arbitrary code in GNU/Linux. Type "`<command>", or "`run <command>" for full shell commands. "`fetch <URL>" downloads files. Files saved to $PWD are persistent, and $PWD/bin is in $PATH. $PWD is a mercurial repository, "`revert <rev>" can be used to revert to a revision. See http://codu.org/projects/hackbot/fshg/'
 
     elif [ "$CMD" = "fetch" ]
     then
@@ -85,7 +88,7 @@ runcmd() {
             ulimit -f 10240
             (wget -nv "$ARG" < /dev/null 2>&1 | tr "\n" " "; echo) |
                 sed 's/^/PRIVMSG '$CHANNEL' :/' |
-                socat STDIN UNIX-SENDTO:"$IRC_SOCK"
+                say
         )
 
     elif [ "$CMD" = "run" ]
@@ -103,11 +106,10 @@ runcmd() {
         OUTPUT=$(hg revert --all -r "$REV" 2>&1)
         if [ $? -eq 0 ]
         then
-            MSG="Done."
+            say 'Done.'
         else
-            MSG=$OUTPUT
+            say "$OUTPUT"
         fi
-        echo "PRIVMSG $CHANNEL :$MSG" | socat STDIN UNIX-SENDTO:"$IRC_SOCK"
 
     else
         if [ "$ARG" = "" ]
