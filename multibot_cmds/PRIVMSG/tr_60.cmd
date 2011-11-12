@@ -21,20 +21,17 @@ irc.connect(os.environ['IRC_SOCK'])
 server = socket.socket(socket.AF_UNIX)
 server.connect(os.environ['SERVER_SOCK'])
 
+message = sys.argv[3][1:]
+channel = sys.argv[2]
+if not channel.startswith('#'):
+    channel = os.environ['IRC_NICK']
+
 def say(text):
     irc.send('PRIVMSG %s :%s\r\n' % (channel, text))
 
 def transact(*args):
     data = [os.environ['IRC_NICK'], channel] + args
     server.send(struct.pack('!p', '\0'.join(data)))
-
-if irc:
-    message = sys.argv[3][1:]
-    channel = sys.argv[2]
-    if not channel.startswith('#'):
-        channel = os.environ['IRC_NICK']
-else:
-    message = sys.argv[1]
 
 command, arg = message.split(' ', 1)
 
