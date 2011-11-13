@@ -53,6 +53,6 @@ elif command == 'revert':
     transact('lib/revert', arg)
 else:
     if arg:
-        transact('lib/sandbox', command)
-    else:
         transact('lib/sandbox', command, arg)
+    else:
+        transact('lib/sandbox', command)
