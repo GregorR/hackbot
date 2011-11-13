@@ -4,7 +4,6 @@
 import sys
 import os
 import socket
-import struct
 
 ignored_nicks = ['Lymia', 'Lymee', 'Madoka-Kaname']
 
@@ -33,7 +32,7 @@ def say(text):
 def transact(*args):
     data = [os.environ['IRC_SOCK'], os.environ['IRC_NICK'], channel]
     data += list(args)
-    server.send(struct.pack('!p', '\0'.join(data)))
+    server.send(chr(len(data)) + data)
 
 parts = message.split(' ', 1)
 command = parts[0]
