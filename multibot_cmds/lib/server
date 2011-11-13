@@ -10,6 +10,7 @@ import tempfile
 import shutil
 
 irc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+irc_path = None
 transactions = []
 commit_queue = Queue.Queue()
 
@@ -85,9 +86,10 @@ def commit_thread():
 
         for channel, output in outputs:
             if output:
-                irc.send('PRIVMSG %s :%s\r\n' % (channel, sanitize(output)))
+                message = 'PRIVMSG %s :%s\r\n' % (channel, sanitize(output))
             else:
-                irc.send('PRIVMSG %s :No output.\r\n' % (channel,)) 
+                message = 'PRIVMSG %s :No output.\r\n' % (channel,)
+            irc.sendto(message, irc_path)
 
         transactions = new_transactions
         for transaction in to_start:
@@ -155,10 +157,8 @@ if __name__ == '__main__':
     threading.Thread(target=commit_thread).start()
     while True:
         data = server.recv(4096).split('\0')
+        irc_path = data[0]
         print data
-        if not irc:
-            irc_path = data[0]
-            irc.connect(irc_path)
         transaction = Transaction(*data[1:])
         transactions.append(transaction)
         transaction.start()
