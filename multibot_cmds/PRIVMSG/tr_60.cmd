@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # 60 = `
 
+import sys
 import os
 import socket
 import cPickle as pickle
