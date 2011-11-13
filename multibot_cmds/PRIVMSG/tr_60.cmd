@@ -30,7 +30,7 @@ def say(text):
     irc.send('PRIVMSG %s :%s\r\n' % (channel, text))
 
 def transact(*args):
-    data = [os.environ['IRC_NICK'], channel] + args
+    data = [os.environ['IRC_SOCK'], os.environ['IRC_NICK'], channel] + args
     server.send(struct.pack('!p', '\0'.join(data)))
 
 command, arg = message.split(' ', 1)
