@@ -77,6 +77,8 @@ def commit_thread():
 
             outputs.append((transaction.channel, transaction.output))
 
+        print outputs
+
         for channel, output in outputs:
             if output:
                 irc.send('PRIVMSG %s :%s\r\n' % (channel, sanitize(output)))
