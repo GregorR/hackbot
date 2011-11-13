@@ -27,7 +27,7 @@ def hg(hackenv, *args):
     proc = subprocess.Popen(
         ['hg', '--encodingmode', 'replace'] +
         ['-R', hackenv] if hackenv else [] +
-        args,
+        list(args),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT)
