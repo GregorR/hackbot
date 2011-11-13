@@ -14,7 +14,7 @@ transactions = []
 commit_queue = Queue.Queue()
 
 def sanitize(output):
-    output = re.subn(r'\r?\n', ' \\ ')
+    output = re.subn(r'\r?\n', ' \\ ', output.rstrip('\r\n'))
     output = re.subn(r'[\x00-\x1F]', '.', output)
     output = re.subn(r'^[^a-zA-Z0-9]', '\xE2\x80\x8B\\1', output)
     if len(output) > 450:
