@@ -4,7 +4,7 @@ import sys
 import signal
 import resource
 
-resource.setrlimit(resource.RLIMIT_FSIZE, 10240)
+resource.setrlimit(resource.RLIMIT_FSIZE, (10240, 10240))
 signal.alarm(30)
 sys.stdout.write(subprocess.Proc(
     ['wget', '-nv', sys.argv[1]],

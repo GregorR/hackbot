@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 import socket
 import threading
 import subprocess
@@ -70,13 +71,14 @@ def commit_thread():
                 # Commit the transaction
                 try:
                     hg(transaction.hackenv, 'addremove')
-                    hg(transaction.hackenv, 'commit', '<%s> %s' %
+                    hg(transaction.hackenv, 'commit', '-m', '<%s> %s' %
                        (transaction.nick, ' '.join(transaction.args)))
                     hg(transaction.hackenv, 'push')
                 except HgFailed, e:
                     # Just pretend it worked...
-                    outputs.append((transaction.channel, e.message))
+                    outputs.append((transaction.channel, str(e)))
 
+            transaction.clean_up()
             outputs.append((transaction.channel, transaction.output))
 
         print outputs
