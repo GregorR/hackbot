@@ -20,6 +20,6 @@ subprocess.call(
      '--translate', '/hackenv/.hg', os.path.join(os.environ['HACKENV'], '.hg'),
      '--cwd', '/hackenv',
      '--timeout', '30',
-     '-R3128:127.0.0.1a:3128',
+     '-R3128:127.0.0.1:3128',
      'env', 'PATH=' + path, 'HACKENV=/hackenv', 'http_proxy=' + http_proxy,
      os.path.join(lib, 'limits')] + sys.argv[1:])
