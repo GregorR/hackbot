@@ -140,11 +140,10 @@ class Transaction(object):
 if __name__ == '__main__':
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     server.bind(os.environ['SERVER_SOCK'])
-    sock, _ = server.accept()
     threading.Thread(target=commit_queue).start()
     while True:
-        nbytes = ord(sock.read(1))
-        irc_path, data = sock.read(nbytes).split('\0')
+        nbytes = ord(server.read(1))
+        irc_path, data = server.read(nbytes).split('\0')
         if not irc:
             irc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
             irc.connect(irc_path)
