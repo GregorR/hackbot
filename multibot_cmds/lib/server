@@ -24,10 +24,12 @@ class HgFailed(Exception):
     pass
 
 def hg(hackenv, *args):
+    command = ['hg', '--encodingmode', 'replace']
+    if hackenv:
+        command += ['-R', 'hackenv']
+    command += list(args)
     proc = subprocess.Popen(
-        ['hg', '--encodingmode', 'replace'] +
-        ['-R', hackenv] if hackenv else [] +
-        list(args),
+        command,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT)
