@@ -64,7 +64,7 @@ def commit_thread():
                 new_transactions.append(new_transaction)
                 continue
 
-            if committing or not transaction.done:
+            if not committing or not transaction.done:
                 committing = False
                 new_transactions.append(transaction)
                 continue
