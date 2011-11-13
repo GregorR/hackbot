@@ -52,6 +52,8 @@ def commit_thread():
         print (transactions, 'commit phase')
 
         for transaction in transactions:
+            print (transaction.done, transaction.changed, transaction.output)
+
             if killing:
                 if not transaction.done:
                     transaction.done = True
