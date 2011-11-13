@@ -68,6 +68,7 @@ def commit_thread():
                 continue
 
             if transaction.changed:
+                print (transaction.args, 'changed')
                 killing = True
                 # Commit the transaction
                 try:
