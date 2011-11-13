@@ -32,7 +32,7 @@ def say(text):
 def transact(*args):
     data = '\0'.join(
         [os.environ['IRC_SOCK'], os.environ['IRC_NICK'], channel] + list(args))
-    server.send(chr(len(data)) + data)
+    server.send(data)
 
 parts = message.split(' ', 1)
 command = parts[0]

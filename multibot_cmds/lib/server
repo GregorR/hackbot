@@ -152,8 +152,7 @@ if __name__ == '__main__':
     server.bind(os.environ['SERVER_SOCK'])
     threading.Thread(target=commit_thread).start()
     while True:
-        nbytes = ord(server.recv(1))
-        data = server.recv(nbytes).split('\0')
+        data = server.recv(4096).split('\0')
         print data
         if not irc:
             irc_path = data[0]
