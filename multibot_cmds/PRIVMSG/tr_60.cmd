@@ -34,7 +34,9 @@ def transact(*args):
     data = [os.environ['IRC_SOCK'], os.environ['IRC_NICK'], channel] + args
     server.send(struct.pack('!p', '\0'.join(data)))
 
-command, arg = message.split(' ', 1)
+parts = message.split(' ', 1)
+command = parts[0]
+arg = parts[1] if len(parts) > 1 else None
 
 if any(os.environ['IRC_NICK'].startswith(ignore) for ignore in ignored_nicks):
     say('Mmmmm ... no.')
