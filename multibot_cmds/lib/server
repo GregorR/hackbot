@@ -57,6 +57,8 @@ def commit_thread():
             if killing:
                 if not transaction.done:
                     transaction.done = True
+                    # Make sure it's started
+                    while not transaction.process: pass
                     transaction.process.kill()
                 transaction.clean_up()
                 new_transaction = Transaction(commit_queue, transaction.args)
