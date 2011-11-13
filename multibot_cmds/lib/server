@@ -143,6 +143,7 @@ class Transaction(object):
 
     def commit(self):
         global commit_queue
+        subprocess.Popen(['hg', '-R', self.hackenv, 'status', '-umad'])
         self.changed = bool(subprocess.Popen(
             ['hg', '-R', self.hackenv, 'status', '-umad'],
             stdout=subprocess.PIPE).communicate())
