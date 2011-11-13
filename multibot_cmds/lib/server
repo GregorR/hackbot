@@ -97,9 +97,9 @@ def commit_thread():
 
         for channel, output in outputs:
             if output:
-                message = 'PRIVMSG %s :%s\r\n' % (channel, sanitize(output))
+                message = 'PRIVMSG %s :%s\n' % (channel, sanitize(output))
             else:
-                message = 'PRIVMSG %s :No output.\r\n' % (channel,)
+                message = 'PRIVMSG %s :No output.\n' % (channel,)
             irc.sendto(message, irc_path)
 
         transactions = new_transactions

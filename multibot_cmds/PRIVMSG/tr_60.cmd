@@ -27,7 +27,7 @@ if not channel.startswith('#'):
     channel = os.environ['IRC_NICK']
 
 def say(text):
-    irc.send('PRIVMSG %s :%s\r\n' % (channel, text))
+    irc.send('PRIVMSG %s :%s\n' % (channel, text))
 
 def transact(*args):
     data = '\0'.join(
