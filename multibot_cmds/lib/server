@@ -116,8 +116,9 @@ class Transaction(object):
             stderr=subprocess.STDOUT,
             env={'HACKENV': self.hackenv})
         print (self.args, 'running')
-        # FIXME
-        self.output, _ = self.process.communicate()
+        self.output = self.process.stdout.read(512)
+        self.process.stdout.close()
+        self.process.wait()
         print (self.args, 'committing')
         self.commit()
 
