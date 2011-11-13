@@ -11,6 +11,7 @@ lib = os.path.abspath('lib')
 subprocess.Popen(
     ['nice', '-n10',
      '/usr/bin/umlbox',
+     '--no-stdin',
      '--base-mounts',
      '--mount', '/opt',
      '--mount', '/var/irclogs',
