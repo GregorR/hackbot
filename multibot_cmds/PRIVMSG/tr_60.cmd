@@ -4,7 +4,7 @@
 import sys
 import os
 import socket
-import cPickle as pickle
+import struct
 
 ignored_nicks = ['Lymia', 'Lymee', 'Madoka-Kaname']
 
