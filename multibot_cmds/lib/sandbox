@@ -8,7 +8,7 @@ http_proxy = 'http://127.0.0.1:3128'
 path = '/hackenv/bin:/opt/python27/bin:/opt/ghc/bin:/usr/bin:/bin'
 lib = os.path.abspath('lib')
 
-subprocess.call(
+subprocess.Popen(
     ['nice', '-n10',
      '/usr/bin/umlbox',
      '--base-mounts',
@@ -22,4 +22,4 @@ subprocess.call(
      '--timeout', '30',
      '-R3128:127.0.0.1:3128',
      'env', 'PATH=' + path, 'HACKENV=/hackenv', 'http_proxy=' + http_proxy,
-     os.path.join(lib, 'limits')] + sys.argv[1:])
+     os.path.join(lib, 'limits')] + sys.argv[1:]).wait()
