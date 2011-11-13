@@ -6,6 +6,7 @@ else
 fi
 output=$(hg revert -R "$HACKENV" --all -r "$rev" 2>&1)
 if [ $? -eq 0 ]; then
+    find . -name '*.orig' 2>/dev/null | xargs rm -f
     echo 'Done.'
 else
     echo "$output"
