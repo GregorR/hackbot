@@ -140,7 +140,6 @@ class Transaction(object):
 if __name__ == '__main__':
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     server.bind(os.environ['SERVER_SOCK'])
-    server.listen(1)
     sock, _ = server.accept()
     threading.Thread(target=commit_queue).start()
     while True:
