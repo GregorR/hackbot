@@ -56,7 +56,7 @@ def commit_thread():
 
             if transaction.changed:
                 canary = os.path.join(transaction.hackenv, 'canary')
-                if os.path.exists(canary):
+                if not os.path.exists(canary):
                     killing = True
 
             if killing:
