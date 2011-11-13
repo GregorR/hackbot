@@ -51,7 +51,7 @@ def commit_thread():
                     transaction.done = True
                     transaction.process.kill()
                 transaction.clean_up()
-                new_transaction = Transaction(queue, transaction.args)
+                new_transaction = Transaction(commit_queue, transaction.args)
                 to_start.append(new_transaction)
                 new_transactions.append(new_transaction)
                 continue
@@ -140,10 +140,10 @@ class Transaction(object):
 if __name__ == '__main__':
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     server.bind(os.environ['SERVER_SOCK'])
-    threading.Thread(target=commit_queue).start()
+    threading.Thread(target=commit_thread).start()
     while True:
-        nbytes = ord(server.read(1))
-        irc_path, data = server.read(nbytes).split('\0')
+        nbytes = ord(server.recv(1))
+        irc_path, data = server.recv(nbytes).split('\0')
         if not irc:
             irc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
             irc.connect(irc_path)
