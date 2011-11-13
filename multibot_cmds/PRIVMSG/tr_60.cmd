@@ -36,7 +36,7 @@ def transact(*args):
 
 parts = message.split(' ', 1)
 command = parts[0]
-arg = parts[1] if len(parts) > 1 else None
+arg = parts[1] if len(parts) > 1 else ''
 
 if any(os.environ['IRC_NICK'].startswith(ignore) for ignore in ignored_nicks):
     say('Mmmmm ... no.')
