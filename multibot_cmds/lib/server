@@ -28,7 +28,7 @@ class HgFailed(Exception):
 def hg(hackenv, *args):
     command = ['hg', '--encodingmode', 'replace']
     if hackenv:
-        command += ['-R', 'hackenv']
+        command += ['-R', hackenv]
     command += list(args)
     proc = subprocess.Popen(
         command,
@@ -77,8 +77,8 @@ def commit_thread():
                        (transaction.nick, ' '.join(transaction.args)))
                     hg(transaction.hackenv, 'push')
                 except HgFailed, e:
-                    # Just pretend it worked...
-                    outputs.append((transaction.channel, str(e)))
+                    outputs.append((transaction.channel,
+                        'Commit failed: ' + str(e)))
 
             transaction.clean_up()
             outputs.append((transaction.channel, transaction.output))
