@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import signal
 import resource
 import subprocess
@@ -10,4 +11,5 @@ signal.alarm(30)
 sys.stdout.write(subprocess.Popen(
     ['wget', '-nv', sys.argv[1]],
     stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT).communicate()[0])
+    stderr=subprocess.STDOUT,
+    cwd=os.environ['HACKENV']).communicate()[0])

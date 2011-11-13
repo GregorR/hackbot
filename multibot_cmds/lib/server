@@ -121,7 +121,6 @@ class Transaction(object):
             self.args,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            cwd=self.hackenv,
             env={'HACKENV': self.hackenv})
         print (self.args, 'running')
         self.output = self.process.stdout.read(512)
