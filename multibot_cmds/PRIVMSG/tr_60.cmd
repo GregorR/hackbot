@@ -30,8 +30,8 @@ def say(text):
     irc.send('PRIVMSG %s :%s\r\n' % (channel, text))
 
 def transact(*args):
-    data = [os.environ['IRC_SOCK'], os.environ['IRC_NICK'], channel]
-    data += list(args)
+    data = '\0'.join(
+        [os.environ['IRC_SOCK'], os.environ['IRC_NICK'], channel] + list(args))
     server.send(chr(len(data)) + data)
 
 parts = message.split(' ', 1)
