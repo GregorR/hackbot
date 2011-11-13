@@ -52,7 +52,7 @@ def commit_thread():
         print (transactions, 'commit phase')
 
         for transaction in transactions:
-            print (transaction.done, transaction.changed, transaction.output)
+            print ('CHECK', (transaction.args, transaction.done, transaction.changed, transaction.output))
 
             if killing:
                 if not transaction.done:
@@ -65,6 +65,7 @@ def commit_thread():
                 continue
 
             if not committing or not transaction.done:
+                print 'CARRY'
                 committing = False
                 new_transactions.append(transaction)
                 continue
