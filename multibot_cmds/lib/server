@@ -30,10 +30,8 @@ def hg(hackenv, *args):
     command += list(args)
     proc = subprocess.Popen(
         command,
-        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT)
-    proc.stdin.close()
     output, _ = proc.communicate()
     if proc.returncode != 0:
         raise HgFailed(output)
@@ -112,11 +110,9 @@ class Transaction(object):
             return
         self.process = subprocess.Popen(
             self.args,
-            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             env={'HACKENV': self.hackenv})
-        self.process.stdin.close()
         print (self.args, 'running')
         self.output = self.process.stdout.read(512)
         self.process.stdout.close()
