@@ -138,7 +138,7 @@ class Transaction(object):
         shutil.rmtree(self.hackenv, ignore_errors=True)
 
 if __name__ == '__main__':
-    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     server.bind(os.environ['SERVER_SOCK'])
     server.listen(1)
     sock, _ = server.accept()
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         nbytes = ord(sock.read(1))
         irc_path, data = sock.read(nbytes).split('\0')
         if not irc:
-            irc = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            irc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
             irc.connect(irc_path)
         transaction = Transaction(*data)
         transactions.append(transaction)

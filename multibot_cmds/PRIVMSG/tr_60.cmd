@@ -15,10 +15,10 @@ $PATH. $PWD is a mercurial repository, "`revert <rev>" can be used to \
 revert to a revision. See http://codu.org/projects/hackbot/fshg/\
 '''
 
-irc = socket.socket(socket.AF_UNIX)
+irc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 irc.connect(os.environ['IRC_SOCK'])
 
-server = socket.socket(socket.AF_UNIX)
+server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 server.connect(os.environ['SERVER_SOCK'])
 
 message = sys.argv[3][1:]
