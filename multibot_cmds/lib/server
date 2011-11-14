@@ -17,7 +17,7 @@ commit_queue = Queue.Queue()
 def sanitize(output):
     output = re.sub(r'\r?\n', ' \\ ', output.rstrip('\r\n'))
     output = re.sub(r'[\x00-\x1F]', '.', output)
-    output = re.sub(r'^[^a-zA-Z0-9]', '\xE2\x80\x8B\\1', output)
+    output = re.sub(r'^([^a-zA-Z0-9])', '\xE2\x80\x8B\\1', output)
     if len(output) > 450:
         output = output[:447] + '...'
     return output
