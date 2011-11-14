@@ -54,11 +54,6 @@ def commit_thread():
         for transaction in transactions:
             print ('CHECK', (transaction.args, transaction.done, transaction.changed, transaction.output))
 
-            if transaction.changed:
-                canary = os.path.join(transaction.hackenv, 'canary')
-                if not os.path.exists(canary):
-                    outputs.append((transaction.channel, transaction.output))cc
-
             if killing:
                 if not transaction.done:
                     transaction.done = True
