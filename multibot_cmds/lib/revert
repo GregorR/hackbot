@@ -1,0 +1,13 @@
+#!/bin/sh
+if [ "$1" = "" ]; then
+    rev=-2
+else
+    rev=$1
+fi
+output=$(hg revert -R "$HACKENV" --all -r "$rev" 2>&1)
+if [ $? -eq 0 ]; then
+    find "$HACKENV" -name '*.orig' -exec rm -f '{}' \;
+    echo 'Done.'
+else
+    echo "$output"
+fi
