@@ -31,11 +31,11 @@ def say(text):
     irc.send('PRIVMSG %s :%s\n' % (channel, text))
 
 def calldevnull(*args):
-    p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     p.communicate()
 
 def callLimit(args):
-    p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     p.stdin.close()
     ret = p.stdout.read(1024)
     p.stdout.close()
