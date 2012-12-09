@@ -81,7 +81,7 @@ def transact(log, *args):
         if os.path.exists(os.path.join(os.environ['HACKENV'], "canary")):
             calldevnull("hg", "addremove", "-R", os.environ['HACKENV'])
             calldevnull("hg", "commit", "-R", os.environ['HACKENV'], "-m", "<%s> %s" %
-                (os.environ['IRC_NICK'], log))
+                (os.environ['IRC_NICK'], log.encode('string_escape')))
 
     fcntl.flock(lockf, fcntl.LOCK_UN)
     os.close(lockf)
