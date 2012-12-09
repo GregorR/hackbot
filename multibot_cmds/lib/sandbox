@@ -8,19 +8,15 @@ http_proxy = 'http://127.0.0.1:3128'
 path = '/hackenv/bin:/opt/python27/bin:/opt/ghc/bin:/usr/bin:/bin'
 lib = os.path.abspath('lib')
 
-subprocess.Popen(
+subprocess.call(
     ['nice', '-n10',
      '/usr/bin/umlbox',
      '--no-stdin',
      '--base-mounts',
-     '--mount', '/opt',
-     '--mount', '/var/irclogs',
-     '--mount', '/etc/java-6-openjdk',
      '--mount', lib,
      '--translate-write', '/hackenv', os.environ['HACKENV'],
      '--translate', '/hackenv/.hg', os.path.join(os.environ['HACKENV'], '.hg'),
      '--cwd', '/hackenv',
      '--timeout', '30',
-     '-R3128:127.0.0.1:3128',
      'env', 'PATH=' + path, 'HACKENV=/hackenv', 'http_proxy=' + http_proxy,
-     os.path.join(lib, 'limits')] + sys.argv[1:]).wait()
+     os.path.join(lib, 'limits')] + sys.argv[1:])
