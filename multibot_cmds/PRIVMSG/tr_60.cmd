@@ -53,6 +53,7 @@ def transact(log, *args):
     so = status.communicate()[0]
     if so != "":
         # OK, we need to do this exclusively
+        fcntl.flock(lockf, fcntl.LOCK_UN)
         fcntl.flock(lockf, fcntl.LOCK_EX)
 
         status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-umad"],
