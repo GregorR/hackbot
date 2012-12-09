@@ -94,7 +94,7 @@ def transact(log, *args):
     if not re.match("^[A-Za-z0-9_]", output):
         output = "\xe2\x80\x8b" + output
 
-    output = string.replace(output, "\n", " \\ ")[:350]
+    output = string.replace(string.replace(string.replace(output, "\n", " \\ "), "\x01", "."), "\x00", ".")[:350]
     say(output)
 
 parts = message.split(' ', 1)
