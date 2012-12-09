@@ -94,11 +94,11 @@ if any(os.environ['IRC_NICK'].startswith(ignore) for ignore in ignored_nicks):
 if command == 'help':
     say(help_text)
 elif command == 'fetch':
-    transact('lib/fetch', arg)
+    transact('fetch ' + arg, 'lib/fetch', arg)
 elif command == 'run':
     transact(arg, 'lib/sandbox', 'bash', '-c', arg)
 elif command == 'revert':
-    transact('lib/revert', arg)
+    transact('revert ' + arg, 'lib/revert', arg)
 else:
     if arg:
         transact(command + ' ' + arg, 'lib/sandbox', command, arg)
