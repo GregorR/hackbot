@@ -7,6 +7,7 @@ import socket
 import string
 import subprocess
 import fcntl
+import re
 
 ignored_nicks = ['Lymia', 'Lymee', 'Madoka-Kaname']
 
@@ -85,9 +86,15 @@ def transact(log, *args):
     fcntl.flock(lockf, fcntl.LOCK_UN)
     os.close(lockf)
 
-    output = string.replace(string.rstrip(output), "\n", " \\ ")[:350]
+    output = string.rstrip(output)
     if output == "":
         output = "No output."
+
+    # be safe if the first char is not alphanumeric
+    if not re.match("^[A-Za-z0-9_]", output):
+        output = "\xe2\x80\x8b" + output
+
+    output = string.replace(output, "\n", " \\ ")[:350]
     say(output)
 
 parts = message.split(' ', 1)
