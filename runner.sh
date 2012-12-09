@@ -3,6 +3,9 @@
 NAME="HackBot"
 CHANNEL="hackbot"
 
+HACKENV="$PWD/multibot_cmds/env"
+export HACKENV
+
 cd "`dirname $0`"
 if [ ! -e multibot_cmds/env ]
 then
