@@ -27,7 +27,7 @@ if not channel.startswith('#'):
     channel = os.environ['IRC_NICK']
 
 def say(text):
-    irc.send('PRIVMSG %s :%s\n' % (channel, text))
+    irc.send(('PRIVMSG %s :%s\n' % (channel, text))[:350])
 
 def calldevnull(*args):
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
