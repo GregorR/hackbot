@@ -27,18 +27,25 @@ if not channel.startswith('#'):
     channel = os.environ['IRC_NICK']
 
 def say(text):
-    irc.send(('PRIVMSG %s :%s\n' % (channel, text))[:350])
+    irc.send('PRIVMSG %s :%s\n' % (channel, text))
 
 def calldevnull(*args):
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.communicate()
 
+def callLimit(args):
+    p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p.stdin.close()
+    ret = p.stdout.read(1024)
+    p.stdout.close()
+    p.wait()
+    return ret
+
 def transact(log, *args):
     lockf = os.open("lock", os.O_RDWR)
     fcntl.flock(lockf, fcntl.LOCK_SH)
 
-    proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = proc.communicate()[0]
+    output = callLimit(args)
 
     # Check if we wrote
     status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-umad"],
@@ -66,8 +73,7 @@ def transact(log, *args):
         calldevnull("hg", "up", "-R", os.environ['HACKENV'], "-C")
 
         # Run again
-        proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = proc.communicate()[0]
+        output = callLimit(args)
 
         # And commit
         if os.path.exists(os.path.join(os.environ['HACKENV'], "canary")):
@@ -78,7 +84,7 @@ def transact(log, *args):
     fcntl.flock(lockf, fcntl.LOCK_UN)
     os.close(lockf)
 
-    output = string.replace(string.rstrip(output), "\n", " \\ ")
+    output = string.replace(string.rstrip(output), "\n", " \\ ")[:350]
     if output == "":
         output = "No output."
     say(output)
