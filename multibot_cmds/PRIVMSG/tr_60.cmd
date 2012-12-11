@@ -42,6 +42,14 @@ def callLimit(args):
     p.wait()
     return ret
 
+def truncate(str):
+    try:
+        str.decode("utf-8")
+        str = str[:350].decode("utf-8", "ignore").encode("utf-8")
+    except:
+        str = str[:350]
+    return str
+
 def transact(log, *args):
     lockf = os.open("lock", os.O_RDWR)
     fcntl.flock(lockf, fcntl.LOCK_SH)
@@ -94,7 +102,8 @@ def transact(log, *args):
     if not re.match("^[A-Za-z0-9_]", output):
         output = "\xe2\x80\x8b" + output
 
-    output = string.replace(string.replace(string.replace(output, "\n", " \\ "), "\x01", "."), "\x00", ".")[:350]
+    output = string.replace(string.replace(string.replace(output, "\n", " \\ "), "\x01", "."), "\x00", ".")
+    output = truncate(output)
     say(output)
 
 parts = message.split(' ', 1)
