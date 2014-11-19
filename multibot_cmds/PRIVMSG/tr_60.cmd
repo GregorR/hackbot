@@ -73,7 +73,7 @@ def transact(log, *args):
         for sline in so.split("\n"):
             if sline == "":
                 break
-            f = sline.split(" ")[1]
+            f = sline.split(" ", 1)[1]
             try:
                 os.remove(os.path.join(os.environ['HACKENV'], f))
             except:
