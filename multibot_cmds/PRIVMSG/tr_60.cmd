@@ -4,6 +4,7 @@
 import sys
 import os
 import socket
+import stat
 import string
 import subprocess
 import fcntl
@@ -40,6 +41,13 @@ def callLimit(args):
     ret = p.stdout.read(1024)
     p.stdout.close()
     p.wait()
+    # Make sure $HACKENV/.hg is accessible by forcing sane permissions on $HACKENV
+    try:
+        mode = stat.S_IMODE(os.stat(os.environ['HACKENV']).st_mode)
+        if mode & stat.S_IRWXU != stat.S_IRWXU:
+            os.chmod(os.environ['HACKENV'], mode | stat.S_IRWXU)
+    except:
+        pass
     return ret
 
 def truncate(str):
