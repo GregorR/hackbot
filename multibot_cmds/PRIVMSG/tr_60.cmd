@@ -58,19 +58,22 @@ def truncate(str):
         str = str[:350]
     return str
 
-def transact(log, *args):
+def transact(log, always_exclusive, args):
     lockf = os.open("lock", os.O_RDWR)
-    fcntl.flock(lockf, fcntl.LOCK_SH)
 
-    output = callLimit(args)
+    if not always_exclusive:
+        fcntl.flock(lockf, fcntl.LOCK_SH)
 
-    # Check if we wrote
-    status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    so = status.communicate()[0]
-    if so != "":
+        output = callLimit(args)
+
+        # Check if we wrote
+        status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        so = status.communicate()[0]
+
+    if always_exclusive or so != "":
         # OK, we need to do this exclusively
-        fcntl.flock(lockf, fcntl.LOCK_UN)
+        if not always_exclusive: fcntl.flock(lockf, fcntl.LOCK_UN)
         fcntl.flock(lockf, fcntl.LOCK_EX)
 
         status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
@@ -125,13 +128,13 @@ if any(os.environ['IRC_NICK'].startswith(ignore) for ignore in ignored_nicks):
 if command == 'help':
     say(help_text)
 elif command == 'fetch':
-    transact('fetch ' + arg, 'lib/fetch', arg)
+    transact('fetch ' + arg, True, ['lib/fetch', arg])
 elif command == 'run':
-    transact(arg, 'lib/sandbox', 'bash', '-c', arg)
+    transact(arg, False, ['lib/sandbox', 'bash', '-c', arg])
 elif command == 'revert':
-    transact('revert ' + arg, 'lib/revert', arg)
+    transact('revert ' + arg, True, ['lib/revert', arg])
 else:
     if arg:
-        transact(command + ' ' + arg, 'lib/sandbox', command, arg)
+        transact(command + ' ' + arg, False, ['lib/sandbox', command, arg])
     else:
-        transact(command, 'lib/sandbox', command)
+        transact(command, False, ['lib/sandbox', command])
