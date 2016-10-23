@@ -65,7 +65,7 @@ def transact(log, *args):
     output = callLimit(args)
 
     # Check if we wrote
-    status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-umad"],
+    status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     so = status.communicate()[0]
     if so != "":
@@ -73,7 +73,7 @@ def transact(log, *args):
         fcntl.flock(lockf, fcntl.LOCK_UN)
         fcntl.flock(lockf, fcntl.LOCK_EX)
 
-        status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-umad"],
+        status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         so = status.communicate()[0]
 
