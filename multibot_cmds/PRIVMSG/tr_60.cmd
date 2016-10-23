@@ -58,6 +58,25 @@ def truncate(str):
         str = str[:350]
     return str
 
+def cleanWorkdir():
+    # Find all changed files
+    status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    so = status.communicate()[0]
+
+    # Remove anything broken
+    for sline in so.split("\n"):
+        if sline == "":
+            break
+        f = sline.split(" ", 1)[1]
+        try:
+            os.remove(os.path.join(os.environ['HACKENV'], f))
+        except:
+            pass
+
+    # Get ourselves back up to date
+    calldevnull("hg", "up", "-R", os.environ['HACKENV'], "-C")
+
 def transact(log, always_exclusive, args):
     lockf = os.open("lock", os.O_RDWR)
 
@@ -76,31 +95,19 @@ def transact(log, always_exclusive, args):
         if not always_exclusive: fcntl.flock(lockf, fcntl.LOCK_UN)
         fcntl.flock(lockf, fcntl.LOCK_EX)
 
-        status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        so = status.communicate()[0]
-
-        # Remove anything broken
-        for sline in so.split("\n"):
-            if sline == "":
-                break
-            f = sline.split(" ", 1)[1]
-            try:
-                os.remove(os.path.join(os.environ['HACKENV'], f))
-            except:
-                pass
-
-        # Get ourselves back up to date
-        calldevnull("hg", "up", "-R", os.environ['HACKENV'], "-C")
+        # Restore the working directory
+        cleanWorkdir()
 
         # Run again
         output = callLimit(args)
 
-        # And commit
+        # And commit (or cleanup if blocked by canary)
         if os.path.exists(os.path.join(os.environ['HACKENV'], "canary")):
             calldevnull("hg", "addremove", "-R", os.environ['HACKENV'])
             calldevnull("hg", "commit", "-R", os.environ['HACKENV'], "-m", "<%s> %s" %
                 (os.environ['IRC_NICK'], log.encode('string_escape')))
+        else:
+            cleanWorkdir()
 
     fcntl.flock(lockf, fcntl.LOCK_UN)
     os.close(lockf)
