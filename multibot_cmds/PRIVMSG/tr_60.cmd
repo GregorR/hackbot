@@ -58,46 +58,56 @@ def truncate(str):
         str = str[:350]
     return str
 
-def transact(log, *args):
-    lockf = os.open("lock", os.O_RDWR)
-    fcntl.flock(lockf, fcntl.LOCK_SH)
-
-    output = callLimit(args)
-
-    # Check if we wrote
-    status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-umad"],
+def cleanWorkdir():
+    # Find all changed files
+    status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     so = status.communicate()[0]
-    if so != "":
-        # OK, we need to do this exclusively
-        fcntl.flock(lockf, fcntl.LOCK_UN)
-        fcntl.flock(lockf, fcntl.LOCK_EX)
 
-        status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-umad"],
+    # Remove anything broken
+    for sline in so.split("\n"):
+        if sline == "":
+            break
+        f = sline.split(" ", 1)[1]
+        try:
+            os.remove(os.path.join(os.environ['HACKENV'], f))
+        except:
+            pass
+
+    # Get ourselves back up to date
+    calldevnull("hg", "up", "-R", os.environ['HACKENV'], "-C")
+
+def transact(log, always_exclusive, args):
+    lockf = os.open("lock", os.O_RDWR)
+
+    if not always_exclusive:
+        fcntl.flock(lockf, fcntl.LOCK_SH)
+
+        output = callLimit(args)
+
+        # Check if we wrote
+        status = subprocess.Popen(["hg", "status", "-R", os.environ['HACKENV'], "-rumad"],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         so = status.communicate()[0]
 
-        # Remove anything broken
-        for sline in so.split("\n"):
-            if sline == "":
-                break
-            f = sline.split(" ", 1)[1]
-            try:
-                os.remove(os.path.join(os.environ['HACKENV'], f))
-            except:
-                pass
+    if always_exclusive or so != "":
+        # OK, we need to do this exclusively
+        if not always_exclusive: fcntl.flock(lockf, fcntl.LOCK_UN)
+        fcntl.flock(lockf, fcntl.LOCK_EX)
 
-        # Get ourselves back up to date
-        calldevnull("hg", "up", "-R", os.environ['HACKENV'], "-C")
+        # Restore the working directory
+        cleanWorkdir()
 
         # Run again
         output = callLimit(args)
 
-        # And commit
+        # And commit (or cleanup if blocked by canary)
         if os.path.exists(os.path.join(os.environ['HACKENV'], "canary")):
             calldevnull("hg", "addremove", "-R", os.environ['HACKENV'])
             calldevnull("hg", "commit", "-R", os.environ['HACKENV'], "-m", "<%s> %s" %
                 (os.environ['IRC_NICK'], log.encode('string_escape')))
+        else:
+            cleanWorkdir()
 
     fcntl.flock(lockf, fcntl.LOCK_UN)
     os.close(lockf)
@@ -125,13 +135,13 @@ if any(os.environ['IRC_NICK'].startswith(ignore) for ignore in ignored_nicks):
 if command == 'help':
     say(help_text)
 elif command == 'fetch':
-    transact('fetch ' + arg, 'lib/fetch', arg)
+    transact('fetch ' + arg, True, ['lib/fetch', arg])
 elif command == 'run':
-    transact(arg, 'lib/sandbox', 'bash', '-c', arg)
+    transact(arg, False, ['lib/sandbox', 'bash', '-c', arg])
 elif command == 'revert':
-    transact('revert ' + arg, 'lib/revert', arg)
+    transact('revert ' + arg, True, ['lib/revert', arg])
 else:
     if arg:
-        transact(command + ' ' + arg, 'lib/sandbox', command, arg)
+        transact(command + ' ' + arg, False, ['lib/sandbox', command, arg])
     else:
-        transact(command, 'lib/sandbox', command)
+        transact(command, False, ['lib/sandbox', command])
